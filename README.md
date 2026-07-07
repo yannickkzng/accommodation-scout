@@ -145,3 +145,49 @@ Die echten Anbieter-APIs haben jeweils eigene Zugangsvoraussetzungen, Feldnamen,
 ## Sicherheit und Genauigkeit
 
 Das Backend soll die Quelle der Wahrheit sein. GPT soll keine Preise, Verfügbarkeit oder Storno-Regeln erfinden. Wenn Daten fehlen, werden sie als `unknown` oder `nicht gefunden` markiert.
+
+## Hotelbeds/HBX live provider
+
+This MVP now includes a first live Hotelbeds connector.
+
+Render environment variables for Hotelbeds test mode:
+
+```env
+USE_MOCK_PROVIDER=false
+HOTELBEDS_API_KEY=your-key
+HOTELBEDS_SECRET=your-secret
+HOTELBEDS_BASE_URL=https://api.test.hotelbeds.com
+HOTELBEDS_SEARCH_RADIUS_KM=5
+HOTELBEDS_MAX_HOTELS=20
+HOTELBEDS_MAX_RATES_PER_ROOM=3
+```
+
+The app signs requests with the required `Api-key` and `X-Signature` headers and calls:
+
+- `GET /hotel-api/1.0/status` via this app's protected `/debug/hotelbeds-status`
+- `POST /hotel-api/1.0/hotels` for availability search
+
+The first MVP searches by geolocation. Known city coordinates are maintained in `app/providers/hotelbeds.py` under `KNOWN_COORDINATES`. Add more cities there as needed, or pass `target_coordinates` in the search request.
+
+To test Hotelbeds credentials through your deployed backend:
+
+```powershell
+$token = "YOUR_ACCOMMODATION_SCOUT_API_TOKEN"
+Invoke-RestMethod `
+  -Uri "https://YOUR-RENDER-URL.onrender.com/debug/hotelbeds-status" `
+  -Headers @{ Authorization = "Bearer $token" }
+```
+
+To test live search:
+
+```powershell
+$token = "YOUR_ACCOMMODATION_SCOUT_API_TOKEN"
+Invoke-RestMethod `
+  -Uri "https://YOUR-RENDER-URL.onrender.com/search-accommodations" `
+  -Method POST `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -InFile "sample_request_hotelbeds.json" | ConvertTo-Json -Depth 10
+```
+
+Note: Hotelbeds test accounts have limited daily quota. Start with the status check, then run only a few searches.

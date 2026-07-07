@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.models import SearchRequest, SearchResponse
 from app.services.search import search_accommodations
+from app.providers.base import ProviderNotConfigured
+from app.providers.hotelbeds import HotelbedsProvider
 
 app = FastAPI(
     title="Accommodation Scout API",
@@ -40,3 +42,13 @@ async def health():
 @app.post("/search-accommodations", response_model=SearchResponse)
 async def search(request: SearchRequest, _: bool = Depends(verify_auth)):
     return await search_accommodations(request)
+
+
+@app.get("/debug/hotelbeds-status")
+async def hotelbeds_status(_: bool = Depends(verify_auth)):
+    try:
+        return await HotelbedsProvider().status()
+    except ProviderNotConfigured as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Hotelbeds status check failed: {exc}") from exc
