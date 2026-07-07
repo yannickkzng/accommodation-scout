@@ -1,0 +1,18 @@
+{
+  "destination": "Florenz",
+  "checkin": "2026-09-12",
+  "checkout": "2026-09-16",
+  "adults": 2,
+  "children": 0,
+  "rooms": 1,
+  "max_total_price": 900,
+  "currency": "EUR",
+  "min_rating": 8.5,
+  "accommodation_types": ["hotel", "apartment"],
+  "must_haves": ["free_cancellation"],
+  "nice_to_haves": ["breakfast", "central_location"],
+  "no_gos": ["high_deposit"],
+  "sort_preference": "best_value",
+  "max_results": 7,
+  "target_location": "Altstadt"
+}

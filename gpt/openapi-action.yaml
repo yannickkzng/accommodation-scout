@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info:
+  title: Accommodation Scout API
+  version: 1.0.0
+  description: Search available accommodations based on travel dates, guest count, budget, rating, location preferences, cancellation policy and other user-defined criteria.
+servers:
+  - url: https://YOUR_BACKEND_DOMAIN_HERE
+paths:
+  /search-accommodations:
+    post:
+      operationId: searchAccommodations
+      summary: Search available accommodations
+      description: Finds available accommodations for exact travel dates and user criteria. Only returns accommodations marked as available by the backend.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - destination
+                - checkin
+                - checkout
+                - adults
+              properties:
+                destination:
+                  type: string
+                  description: Destination city, region or area.
+                  example: Florenz
+                checkin:
+                  type: string
+                  format: date
+                  example: "2026-09-12"
+                checkout:
+                  type: string
+                  format: date
+                  example: "2026-09-16"
+                adults:
+                  type: integer
+                  minimum: 1
+                  example: 2
+                children:
+                  type: integer
+                  minimum: 0
+                  default: 0
+                  example: 0
+                rooms:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  example: 1
+                max_total_price:
+                  type: number
+                  description: Maximum total price for the whole stay, not price per night.
+                  example: 900
+                currency:
+                  type: string
+                  default: EUR
+                  example: EUR
+                min_rating:
+                  type: number
+                  minimum: 0
+                  maximum: 10
+                  example: 8.5
+                accommodation_types:
+                  type: array
+                  items:
+                    type: string
+                  description: Allowed accommodation types such as hotel, apartment, villa, guesthouse.
+                  example: ["hotel", "apartment"]
+                must_haves:
+                  type: array
+                  items:
+                    type: string
+                  description: Hard requirements. Use canonical values when possible.
+                  example: ["free_cancellation", "central_location"]
+                nice_to_haves:
+                  type: array
+                  items:
+                    type: string
+                  description: Preferences that improve scoring but do not filter out results.
+                  example: ["breakfast", "parking", "balcony"]
+                no_gos:
+                  type: array
+                  items:
+                    type: string
+                  description: Dealbreakers such as noise complaints, cleanliness complaints or high deposit.
+                  example: ["noise_complaints", "high_deposit"]
+                sort_preference:
+                  type: string
+                  enum: ["best_value", "cheapest", "highest_rated", "most_flexible", "best_location"]
+                  default: best_value
+                max_results:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+                  default: 7
+                target_location:
+                  type: string
+                  description: Optional landmark or area the user wants to be near.
+                  example: Dom / Altstadt
+                target_coordinates:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+      responses:
+        "200":
+          description: Available accommodation results matching the criteria.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  search_summary:
+                    type: object
+                    properties:
+                      destination:
+                        type: string
+                      checkin:
+                        type: string
+                        format: date
+                      checkout:
+                        type: string
+                        format: date
+                      guests:
+                        type: string
+                      rooms:
+                        type: integer
+                      results_checked:
+                        type: integer
+                      available_results:
+                        type: integer
+                      returned_results:
+                        type: integer
+                      currency:
+                        type: string
+                      price_last_checked:
+                        type: string
+                        format: date-time
+                      notes:
+                        type: array
+                        items:
+                          type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        provider:
+                          type: string
+                        name:
+                          type: string
+                        type:
+                          type: string
+                        score:
+                          type: number
+                        why_recommended:
+                          type: string
+                        location:
+                          type: object
+                        availability:
+                          type: object
+                        price:
+                          type: object
+                        rating:
+                          type: object
+                        policies:
+                          type: object
+                        reviews_summary:
+                          type: object
+                        booking_url:
+                          type: string
+                        amenities:
+                          type: array
+                          items:
+                            type: string
+                        risk_flags:
+                          type: array
+                          items:
+                            type: string
+                        provider_options:
+                          type: array
+                          items:
+                            type: object
+                  relaxation_suggestions:
+                    type: array
+                    items:
+                      type: string
+        "401":
+          description: Missing or invalid authentication token.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
